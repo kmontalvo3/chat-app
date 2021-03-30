@@ -1,4 +1,4 @@
-# Vue 3 - Realtime Chat App - First developed by [codingwithjustin](https://github.com/codingwithjustin/vue-realtime-chat)
+# Vue 3 - Realtime Chat App
 
 ## Project setup
 Make sure you have node and npm installed. You can install both [here](https://nodejs.org/en/download/). Download the LTS version because it will be the most stable
