@@ -33,6 +33,7 @@ import { useAuth, useChat } from '@/firebase'
 
 import SendIcon from './SendIcon.vue'
 import Message from './Message.vue'
+import CryptoJS from 'crypto-js'
 
 export default {
   components: { Message, SendIcon },
@@ -53,7 +54,15 @@ export default {
 
     const message = ref('')
     const send = () => {
+      var cipherText = CryptoJS.AES.encrypt(
+        message.value,
+        'secretkey123'
+      ).toString()
+      console.log(cipherText)
       sendMessage(message.value)
+      var bytes = CryptoJS.AES.decrypt(cipherText, 'secretkey123')
+      var originalText = bytes.toString(CryptoJS.enc.Utf8)
+      console.log(originalText) // 'my message'
       message.value = ''
     }
 
