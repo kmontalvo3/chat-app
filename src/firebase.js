@@ -59,7 +59,7 @@ export function useChat() {
       text: filter.clean(text),
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       TTL: 5,
-      Likes: 0
+      likes: 0
     })
   }
 
@@ -74,10 +74,10 @@ export function useChat() {
         if (doc.exists) {
           console.log('Document data:', doc.data().TTL)
           newTTL = doc.data().TTL + 1
-          newLikes = doc.data().Likes + 1
+          newLikes = doc.data().likes + 1
           mesRef.update({
             TTL: newTTL,
-            Likes: newLikes
+            likes: newLikes
           })
         } else {
           // doc.data() will be undefined in this case

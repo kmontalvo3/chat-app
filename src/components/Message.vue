@@ -28,10 +28,11 @@ export default {
     date: { type: String, default: '' },
     likes: { type: Number, default: 0 }
   },
-  computed: {
-    computedClass: function() {
-      return updateTTL(this.date)
+  setup(props) {
+    const computedClass = () => {
+      updateTTL(props.date)
     }
+    return { computedClass }
   }
 }
 </script>
