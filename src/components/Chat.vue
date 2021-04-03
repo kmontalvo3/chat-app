@@ -2,11 +2,21 @@
   <div class="container-sm mt-20">
     <div class="mx-5">
       <Message
-        v-for="{ id, text, userPhotoURL, userName, userId } in messages"
+        v-for="{
+          id,
+          text,
+          userPhotoURL,
+          userName,
+          userId,
+          date,
+          likes
+        } in messages"
         :key="id"
         :name="userName"
         :photo-url="userPhotoURL"
         :sender="userId === user?.uid"
+        :date="date"
+        :likes="likes"
       >
         {{ text }}
       </Message>
@@ -59,13 +69,13 @@ export default {
         'secretkey123'
       ).toString()
       console.log(cipherText)
-      sendMessage(message.value)
+      var date = Date()
+      sendMessage(message.value, date)
       var bytes = CryptoJS.AES.decrypt(cipherText, 'secretkey123')
       var originalText = bytes.toString(CryptoJS.enc.Utf8)
       console.log(originalText) // 'my message'
       message.value = ''
     }
-
     return { user, isLogin, messages, bottom, message, send }
   }
 }

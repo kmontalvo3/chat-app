@@ -9,6 +9,7 @@
     "deploy": "yarn build && firebase deploy"
   },
   "dependencies": {
+    "@mdi/font": "^5.9.55",
     "@tailwindcss/postcss7-compat": "^2.0.4",
     "autoprefixer": "^9.8.6",
     "bad-words": "^3.0.4",
@@ -19,7 +20,8 @@
     "postcss": "^7.0.35",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.4",
     "vue": "^3.0.0",
-    "vue-crypt": "^1.0.0"
+    "vue-crypt": "^1.0.0",
+    "vue-material": "^1.0.0-beta-15"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",

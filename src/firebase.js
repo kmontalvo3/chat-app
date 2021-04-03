@@ -48,17 +48,46 @@ export function useChat() {
   onUnmounted(unsubscribe)
 
   const { user, isLogin } = useAuth()
-  const sendMessage = text => {
+  const sendMessage = (text, date) => {
     if (!isLogin.value) return
     const { photoURL, uid, displayName } = user.value
-    messagesCollection.add({
+    messagesCollection.doc(date).set({
+      date: date,
       userName: displayName,
       userId: uid,
       userPhotoURL: photoURL,
       text: filter.clean(text),
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      TTL: 5,
+      Likes: 0
     })
   }
 
-  return { messages, sendMessage }
+  const updateTTL = date => {
+    var mesRef = messagesCollection.doc(date)
+    var newTTL
+    var newLikes
+    if (!isLogin.value) return
+    mesRef
+      .get()
+      .then(doc => {
+        if (doc.exists) {
+          console.log('Document data:', doc.data().TTL)
+          newTTL = doc.data().TTL + 1
+          newLikes = doc.data().Likes + 1
+          mesRef.update({
+            TTL: newTTL,
+            Likes: newLikes
+          })
+        } else {
+          // doc.data() will be undefined in this case
+          console.log('No such document!')
+        }
+      })
+      .catch(error => {
+        console.log('Error getting document:', error)
+      })
+  }
+
+  return { messages, sendMessage, updateTTL }
 }
