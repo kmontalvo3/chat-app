@@ -109,7 +109,7 @@ export function useChat() {
       .then(doc => {
         if (doc.exists) {
           var timeOfMessage = new Date(date).getTime()
-          console.log(timeOfMessage)
+          //console.log(timeOfMessage)
           var timeNow = new Date().getTime()
           if (timeOfMessage + doc.data().TTL * 1000 <= timeNow) {
             deleteMessage(date)

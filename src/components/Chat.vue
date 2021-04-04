@@ -81,7 +81,7 @@ export default {
     const pollData = date => {
       setInterval(() => {
         console.log(checkMessage(date)) //clearInterval(pollNumber)
-      }, 3000)
+      }, 1000)
     }
 
     /* const beforeDestroy = () => {
