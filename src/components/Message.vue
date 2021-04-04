@@ -32,6 +32,7 @@ export default {
     const computedClass = () => {
       updateTTL(props.date)
     }
+
     return { computedClass }
   }
 }

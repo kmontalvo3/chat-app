@@ -49,9 +49,10 @@ export default {
   components: { Message, SendIcon },
   setup() {
     const { user, isLogin } = useAuth()
-    const { messages, sendMessage } = useChat()
+    const { messages, sendMessage, checkMessage } = useChat()
 
     const bottom = ref(null)
+    //var polling = null
     watch(
       messages,
       () => {
@@ -71,12 +72,23 @@ export default {
       console.log(cipherText)
       var date = Date()
       sendMessage(message.value, date)
+      pollData(date)
       var bytes = CryptoJS.AES.decrypt(cipherText, 'secretkey123')
       var originalText = bytes.toString(CryptoJS.enc.Utf8)
       console.log(originalText) // 'my message'
       message.value = ''
     }
-    return { user, isLogin, messages, bottom, message, send }
+    const pollData = date => {
+      setInterval(() => {
+        console.log(checkMessage(date)) //clearInterval(pollNumber)
+      }, 3000)
+    }
+
+    /* const beforeDestroy = () => {
+      clearInterval(polling)
+    } */
+
+    return { user, isLogin, messages, bottom, message, send, pollData }
   }
 }
 </script>

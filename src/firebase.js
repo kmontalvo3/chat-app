@@ -58,7 +58,7 @@ export function useChat() {
       userPhotoURL: photoURL,
       text: filter.clean(text),
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      TTL: 5,
+      TTL: 10,
       likes: 0
     })
   }
@@ -89,5 +89,43 @@ export function useChat() {
       })
   }
 
-  return { messages, sendMessage, updateTTL }
+  const deleteMessage = date => {
+    messagesCollection
+      .doc(date)
+      .delete()
+      .then(() => {
+        console.log('Document successfully deleted!')
+      })
+      .catch(error => {
+        console.error('Error removing document: ', error)
+      })
+  }
+
+  const checkMessage = date => {
+    const mesRef = messagesCollection.doc(date)
+    if (!isLogin.value) return
+    mesRef
+      .get()
+      .then(doc => {
+        if (doc.exists) {
+          var timeOfMessage = new Date(date).getTime()
+          console.log(timeOfMessage)
+          var timeNow = new Date().getTime()
+          if (timeOfMessage + doc.data().TTL * 1000 <= timeNow) {
+            deleteMessage(date)
+            return '1'
+          }
+          //if (doc.data().TTL + date.serverTimestamp)
+        } else {
+          // doc.data() will be undefined in this case
+          console.log('No such document!')
+          return 0
+        }
+      })
+      .catch(error => {
+        console.log('Error getting document:', error)
+      })
+  }
+
+  return { messages, sendMessage, updateTTL, deleteMessage, checkMessage }
 }
