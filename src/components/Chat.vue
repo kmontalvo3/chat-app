@@ -53,7 +53,7 @@ export default {
   },
   components: { Message, SendIcon },
   setup() {
-    const { user, isLogin } = useAuth()
+    const { user, isLogin, mem } = useAuth()
     const { messages, sendMessage, /*checkMessage*/ deleteMessage } = useChat()
     const bottom = ref(null)
     //var polling = null
@@ -69,18 +69,22 @@ export default {
 
     const message = ref('')
     const send = () => {
-      var cipherText = CryptoJS.AES.encrypt(
-        message.value,
-        'secretkey123'
-      ).toString()
-      console.log(cipherText)
+      var iv = CryptoJS.lib.WordArray.random(32).toString() //generate random init vector
+      var cipherText = encryptAES(message.value, iv)
+      //console.log(cipherText)
       var date = Date()
-      sendMessage(message.value, date)
-      var bytes = CryptoJS.AES.decrypt(cipherText, 'secretkey123')
-      var originalText = bytes.toString(CryptoJS.enc.Utf8)
-      console.log(originalText) // 'my message'
+      sendMessage(cipherText, date, iv)
+      //console.log(originalText) // 'my message'
       message.value = ''
     }
+
+    const encryptAES = (text, iv) => {
+      var key = CryptoJS.lib.WordArray.random(32).toString() //generate random AES key for each message
+      mem[iv] = key // store iv and key pair in "memory" on the system
+      console.log(mem)
+      return CryptoJS.AES.encrypt(text, key, { iv: iv }).toString()
+    }
+
     function pollMessages() {
       this.polling = setInterval(() => {
         messages.value.forEach(element => {
@@ -96,7 +100,15 @@ export default {
       }, 1000)
     }
 
-    return { user, isLogin, messages, bottom, message, send, pollMessages }
+    return {
+      user,
+      isLogin,
+      messages,
+      bottom,
+      message,
+      send,
+      pollMessages
+    }
   },
   created() {
     this.pollMessages()

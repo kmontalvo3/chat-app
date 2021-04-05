@@ -4,6 +4,8 @@ import 'firebase/firestore'
 
 import Filter from 'bad-words'
 import { ref, onUnmounted, computed } from 'vue'
+import CryptoJS from 'crypto-js'
+
 
 firebase.initializeApp({
   apiKey: 'AIzaSyCMa03BrETF3sPdrAuT0dBeU5z0ApRi1R0',
@@ -17,8 +19,9 @@ firebase.initializeApp({
 })
 
 const auth = firebase.auth()
-
+const mem = new Object()
 export function useAuth() {
+  
   const user = ref(null)
   const unsubscribe = auth.onAuthStateChanged(_user => (user.value = _user))
   onUnmounted(unsubscribe)
@@ -29,8 +32,7 @@ export function useAuth() {
     await auth.signInWithPopup(googleProvider)
   }
   const signOut = () => auth.signOut()
-
-  return { user, isLogin, signIn, signOut }
+  return { user, isLogin, signIn, signOut, mem }
 }
 
 const firestore = firebase.firestore()
@@ -42,13 +44,21 @@ export function useChat() {
   const messages = ref([])
   const unsubscribe = messagesQuery.onSnapshot(snapshot => {
     messages.value = snapshot.docs
-      .map(doc => ({ id: doc.id, ...doc.data() }))
+      .map(doc => ({ id: doc.id, text: 'hello', ...doc.data() }))
       .reverse()
+    messages.value.forEach(element => {
+      element.text = decryptAES(element.text, element.iv)
+    })
   })
   onUnmounted(unsubscribe)
 
+  function decryptAES(text, iv) {
+    return CryptoJS.AES.decrypt(text, mem[iv], { iv: iv }).toString(
+      CryptoJS.enc.Utf8
+    )
+  }
   const { user, isLogin } = useAuth()
-  const sendMessage = (text, date) => {
+  const sendMessage = (text, date, iv) => {
     if (!isLogin.value) return
     const { photoURL, uid, displayName } = user.value
     messagesCollection.doc(date).set({
@@ -59,9 +69,12 @@ export function useChat() {
       text: filter.clean(text),
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       TTL: 10,
-      likes: 0
+      likes: 0,
+      iv: iv
     })
   }
+
+  
 
   const updateTTL = date => {
     var mesRef = messagesCollection.doc(date)
@@ -125,11 +138,12 @@ export function useChat() {
       })
     return deleted
   } */
-
+  
   return {
     messages,
     sendMessage,
     updateTTL,
-    deleteMessage
+    deleteMessage,
+    mem
   }
 }
