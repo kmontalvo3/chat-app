@@ -46,7 +46,11 @@ import Message from './Message.vue'
 import CryptoJS from 'crypto-js'
 
 export default {
-  polling: null,
+  data() {
+    return {
+      polling: null
+    }
+  },
   components: { Message, SendIcon },
   setup() {
     const { user, isLogin } = useAuth()
@@ -77,8 +81,8 @@ export default {
       console.log(originalText) // 'my message'
       message.value = ''
     }
-    const pollMessages = () => {
-      setInterval(() => {
+    function pollMessages() {
+      this.polling = setInterval(() => {
         messages.value.forEach(element => {
           console.log(element.TTL)
           var date = element.id
@@ -97,7 +101,7 @@ export default {
   created() {
     this.pollMessages()
   },
-  beforeUnmount() {
+  unmounted() {
     clearInterval(this.polling)
   }
 }
