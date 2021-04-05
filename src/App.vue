@@ -1,6 +1,8 @@
 <template>
-  <Nav />
-  <Chat />
+  <div>
+    <Nav />
+    <Chat />
+  </div>
 </template>
 
 <script>

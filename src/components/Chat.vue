@@ -1,6 +1,6 @@
 <template>
-  <div class="container-sm mt-20">
-    <div class="mx-5">
+  <div class="container-sm mt-20 pt-100">
+    <div class="mx-5 pt-20">
       <Message
         v-for="{
           id,
