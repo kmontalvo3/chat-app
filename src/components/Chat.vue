@@ -46,11 +46,11 @@ import Message from './Message.vue'
 import CryptoJS from 'crypto-js'
 
 export default {
+  polling: null,
   components: { Message, SendIcon },
   setup() {
     const { user, isLogin } = useAuth()
-    const { messages, sendMessage, checkMessage } = useChat()
-
+    const { messages, sendMessage, /*checkMessage*/ deleteMessage } = useChat()
     const bottom = ref(null)
     //var polling = null
     watch(
@@ -72,23 +72,33 @@ export default {
       console.log(cipherText)
       var date = Date()
       sendMessage(message.value, date)
-      pollData(date)
       var bytes = CryptoJS.AES.decrypt(cipherText, 'secretkey123')
       var originalText = bytes.toString(CryptoJS.enc.Utf8)
       console.log(originalText) // 'my message'
       message.value = ''
     }
-    const pollData = date => {
+    const pollMessages = () => {
       setInterval(() => {
-        console.log(checkMessage(date)) //clearInterval(pollNumber)
+        messages.value.forEach(element => {
+          console.log(element.TTL)
+          var date = element.id
+          var timeOfMessage = new Date(date).getTime()
+          //console.log(timeOfMessage)
+          var timeNow = new Date().getTime()
+          if (timeOfMessage + element.TTL * 1000 <= timeNow) {
+            deleteMessage(date)
+          }
+        })
       }, 1000)
     }
 
-    /* const beforeDestroy = () => {
-      clearInterval(polling)
-    } */
-
-    return { user, isLogin, messages, bottom, message, send, pollData }
+    return { user, isLogin, messages, bottom, message, send, pollMessages }
+  },
+  created() {
+    this.pollMessages()
+  },
+  beforeUnmount() {
+    clearInterval(this.polling)
   }
 }
 </script>

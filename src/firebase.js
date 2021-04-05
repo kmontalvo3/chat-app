@@ -72,7 +72,7 @@ export function useChat() {
       .get()
       .then(doc => {
         if (doc.exists) {
-          console.log('Document data:', doc.data().TTL)
+          //console.log('Document data:', doc.data().TTL)
           newTTL = doc.data().TTL + 1
           newLikes = doc.data().likes + 1
           mesRef.update({
@@ -88,8 +88,7 @@ export function useChat() {
         console.log('Error getting document:', error)
       })
   }
-
-  const deleteMessage = date => {
+  function deleteMessage(date) {
     messagesCollection
       .doc(date)
       .delete()
@@ -101,7 +100,7 @@ export function useChat() {
       })
   }
 
-  const checkMessage = date => {
+  /* function checkMessage(date) {
     const mesRef = messagesCollection.doc(date)
     if (!isLogin.value) return
     mesRef
@@ -111,21 +110,26 @@ export function useChat() {
           var timeOfMessage = new Date(date).getTime()
           //console.log(timeOfMessage)
           var timeNow = new Date().getTime()
+          deleted = 0
           if (timeOfMessage + doc.data().TTL * 1000 <= timeNow) {
             deleteMessage(date)
-            return '1'
           }
           //if (doc.data().TTL + date.serverTimestamp)
         } else {
           // doc.data() will be undefined in this case
           console.log('No such document!')
-          return 0
         }
       })
       .catch(error => {
         console.log('Error getting document:', error)
       })
-  }
+    return deleted
+  } */
 
-  return { messages, sendMessage, updateTTL, deleteMessage, checkMessage }
+  return {
+    messages,
+    sendMessage,
+    updateTTL,
+    deleteMessage
+  }
 }
