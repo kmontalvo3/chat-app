@@ -81,20 +81,20 @@ export default {
     const encryptAES = (text, iv) => {
       var key = CryptoJS.lib.WordArray.random(32).toString() //generate random AES key for each message
       mem[iv] = key // store iv and key pair in "memory" on the system
-      console.log(mem)
+      //console.log(mem)
       return CryptoJS.AES.encrypt(text, key, { iv: iv }).toString()
     }
 
     function pollMessages() {
       this.polling = setInterval(() => {
         messages.value.forEach(element => {
-          console.log(element.TTL)
+          //console.log(element.TTL)
           var date = element.id
           var timeOfMessage = new Date(date).getTime()
           //console.log(timeOfMessage)
           var timeNow = new Date().getTime()
           if (timeOfMessage + element.TTL * 1000 <= timeNow) {
-            deleteMessage(date)
+            deleteMessage(date, element.iv)
           }
         })
       }, 1000)

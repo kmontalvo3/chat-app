@@ -6,7 +6,6 @@ import Filter from 'bad-words'
 import { ref, onUnmounted, computed } from 'vue'
 import CryptoJS from 'crypto-js'
 
-
 firebase.initializeApp({
   apiKey: 'AIzaSyCMa03BrETF3sPdrAuT0dBeU5z0ApRi1R0',
   authDomain: 'chat-19783.firebaseapp.com',
@@ -21,7 +20,6 @@ firebase.initializeApp({
 const auth = firebase.auth()
 const mem = new Object()
 export function useAuth() {
-  
   const user = ref(null)
   const unsubscribe = auth.onAuthStateChanged(_user => (user.value = _user))
   onUnmounted(unsubscribe)
@@ -74,8 +72,6 @@ export function useChat() {
     })
   }
 
-  
-
   const updateTTL = date => {
     var mesRef = messagesCollection.doc(date)
     var newTTL
@@ -101,44 +97,19 @@ export function useChat() {
         console.log('Error getting document:', error)
       })
   }
-  function deleteMessage(date) {
+  function deleteMessage(date, iv) {
     messagesCollection
       .doc(date)
       .delete()
       .then(() => {
-        console.log('Document successfully deleted!')
+        //console.log('Document successfully deleted!')
+        delete mem[iv]
       })
       .catch(error => {
         console.error('Error removing document: ', error)
       })
   }
 
-  /* function checkMessage(date) {
-    const mesRef = messagesCollection.doc(date)
-    if (!isLogin.value) return
-    mesRef
-      .get()
-      .then(doc => {
-        if (doc.exists) {
-          var timeOfMessage = new Date(date).getTime()
-          //console.log(timeOfMessage)
-          var timeNow = new Date().getTime()
-          deleted = 0
-          if (timeOfMessage + doc.data().TTL * 1000 <= timeNow) {
-            deleteMessage(date)
-          }
-          //if (doc.data().TTL + date.serverTimestamp)
-        } else {
-          // doc.data() will be undefined in this case
-          console.log('No such document!')
-        }
-      })
-      .catch(error => {
-        console.log('Error getting document:', error)
-      })
-    return deleted
-  } */
-  
   return {
     messages,
     sendMessage,
