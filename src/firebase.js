@@ -35,8 +35,30 @@ export function useAuth() {
 
 const firestore = firebase.firestore()
 const messagesCollection = firestore.collection('messages')
+const keyCollection = firestore.collection('keys')
 const messagesQuery = messagesCollection.orderBy('createdAt', 'desc').limit(100)
 const filter = new Filter()
+
+export function encryptAES(text, iv) {
+  var key = CryptoJS.lib.WordArray.random(16).toString() //generate random AES key for each message
+  keyCollection.doc(iv).set({
+    key: key
+  })
+  //mem[iv] = key // store iv and key pair in "memory" on the system
+  //console.log(mem)
+  return CryptoJS.AES.encrypt(text, key, { iv: iv }).toString()
+}
+
+export function keySnapshot() {
+  const unsubscribe = keyCollection.onSnapshot(snapshot => {
+    snapshot.docs.forEach(doc => {
+      mem[doc.id] = doc.data().key
+    })
+    console.log(mem)
+  })
+
+  onUnmounted(unsubscribe)
+}
 
 export function useChat() {
   const messages = ref([])
@@ -45,16 +67,22 @@ export function useChat() {
       .map(doc => ({ id: doc.id, text: 'hello', ...doc.data() }))
       .reverse()
     messages.value.forEach(element => {
-      element.text = decryptAES(element.text, element.iv)
+      //console.log(element)
+      decryptAES(element).then(text => {
+        element.text = text
+        element.show = true
+      })
     })
   })
   onUnmounted(unsubscribe)
 
-  function decryptAES(text, iv) {
-    return CryptoJS.AES.decrypt(text, mem[iv], { iv: iv }).toString(
-      CryptoJS.enc.Utf8
-    )
+  async function decryptAES(element) {
+    element.show = false
+    return CryptoJS.AES.decrypt(element.text, mem[element.iv], {
+      iv: element.iv
+    }).toString(CryptoJS.enc.Utf8)
   }
+
   const { user, isLogin } = useAuth()
   const sendMessage = (text, date, iv) => {
     if (!isLogin.value) return
@@ -66,9 +94,10 @@ export function useChat() {
       userPhotoURL: photoURL,
       text: filter.clean(text),
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      TTL: 10,
+      TTL: 30,
       likes: 0,
-      iv: iv
+      iv: iv,
+      show: false
     })
   }
 
@@ -82,7 +111,7 @@ export function useChat() {
       .then(doc => {
         if (doc.exists) {
           //console.log('Document data:', doc.data().TTL)
-          newTTL = doc.data().TTL + 1
+          newTTL = doc.data().TTL + 5
           newLikes = doc.data().likes + 1
           mesRef.update({
             TTL: newTTL,
@@ -103,7 +132,7 @@ export function useChat() {
       .delete()
       .then(() => {
         //console.log('Document successfully deleted!')
-        delete mem[iv]
+        keyCollection.doc(iv).delete()
       })
       .catch(error => {
         console.error('Error removing document: ', error)

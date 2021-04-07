@@ -39,7 +39,7 @@
 
 <script>
 import { ref, watch, nextTick } from 'vue'
-import { useAuth, useChat } from '@/firebase'
+import { useAuth, useChat, encryptAES, keySnapshot } from '@/firebase'
 
 import SendIcon from './SendIcon.vue'
 import Message from './Message.vue'
@@ -53,7 +53,8 @@ export default {
   },
   components: { Message, SendIcon },
   setup() {
-    const { user, isLogin, mem } = useAuth()
+    keySnapshot()
+    const { user, isLogin } = useAuth()
     const { messages, sendMessage, /*checkMessage*/ deleteMessage } = useChat()
     const bottom = ref(null)
     //var polling = null
@@ -78,12 +79,6 @@ export default {
       message.value = ''
     }
 
-    const encryptAES = (text, iv) => {
-      var key = CryptoJS.lib.WordArray.random(32).toString() //generate random AES key for each message
-      mem[iv] = key // store iv and key pair in "memory" on the system
-      //console.log(mem)
-      return CryptoJS.AES.encrypt(text, key, { iv: iv }).toString()
-    }
 
     function pollMessages() {
       this.polling = setInterval(() => {
