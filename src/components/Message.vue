@@ -2,16 +2,30 @@
   <div class="message" v-if="show">
     <span v-if="!sender">{{ name }}</span>
     <div class="flex" :class="sender ? 'flex-row-reverse' : ''">
-      <Avatar class="mt-1" :src="photoUrl" />
+      <Avatar class="mt-1 flex" :src="photoUrl" />
       <div class="text w-3/4" :class="sender ? 'bg-green-800' : 'bg-gray-700'">
         <slot />
       </div>
       <div>
-        <button style="color:green" @click="upVote">{{ upvotes }}</button>
-        <button style="color:red" @click="downVote">{{ downvotes }}</button>
+        
       </div>
     </div>
-    <span id="date">{{ date }}</span>
+    <div class="text w-3/4">
+          {{ upvotes }}
+          <fa icon="arrow-up" style="color:green" @click="upVote" />
+        
+        
+          {{ downvotes }}
+          <fa icon="arrow-down" style="color:red" @click="downVote" />
+        
+        <span v-if="downvotes < 2 * upvotes">
+          <fa icon="fire" style="color:orange"></fa>
+        </span>
+        <span v-if="downvotes > 2 * upvotes">
+          <fa icon="snowflake" style="color:blue"></fa>
+        </span>
+    </div>
+    <span id="date"></span>
   </div>
 </template>
 
