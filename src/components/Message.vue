@@ -6,24 +6,21 @@
       <div class="text w-3/4" :class="sender ? 'bg-green-800' : 'bg-gray-700'">
         <slot />
       </div>
-      <div>
-        
-      </div>
+      <div></div>
     </div>
     <div class="text w-3/4">
-          {{ upvotes }}
-          <fa icon="arrow-up" style="color:green" @click="upVote" />
-        
-        
-          {{ downvotes }}
-          <fa icon="arrow-down" style="color:red" @click="downVote" />
-        
-        <span v-if="downvotes < 2 * upvotes">
-          <fa icon="fire" style="color:orange"></fa>
-        </span>
-        <span v-if="downvotes > 2 * upvotes">
-          <fa icon="snowflake" style="color:blue"></fa>
-        </span>
+      {{ upvotes }}
+      <fa icon="arrow-up" style="color:green" @click="upVote" />
+
+      {{ downvotes }}
+      <fa icon="arrow-down" style="color:red" @click="downVote" />
+
+      <span v-if="downvotes < 2 * upvotes">
+        <fa icon="fire" style="color:orange"></fa>
+      </span>
+      <span v-if="downvotes > 2 * upvotes">
+        <fa icon="snowflake" style="color:blue"></fa>
+      </span>
     </div>
     <span id="date"></span>
   </div>
