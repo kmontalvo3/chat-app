@@ -4,7 +4,6 @@ import 'firebase/firestore'
 
 import Filter from 'bad-words'
 import { ref, onUnmounted, computed } from 'vue'
-import CryptoJS from 'crypto-js'
 
 firebase.initializeApp({
   apiKey: 'AIzaSyCMa03BrETF3sPdrAuT0dBeU5z0ApRi1R0',
@@ -18,25 +17,86 @@ firebase.initializeApp({
 })
 
 const auth = firebase.auth()
-const mem = new Object()
+//var publicKey = null
 export function useAuth() {
   const user = ref(null)
   const unsubscribe = auth.onAuthStateChanged(_user => (user.value = _user))
   onUnmounted(unsubscribe)
   const isLogin = computed(() => user.value !== null)
-
   const signIn = async () => {
     const googleProvider = new firebase.auth.GoogleAuthProvider()
     await auth.signInWithPopup(googleProvider)
   }
   const signOut = () => auth.signOut()
-  return { user, isLogin, signIn, signOut, mem }
+  return { user, isLogin, signIn, signOut }
 }
 
 const firestore = firebase.firestore()
 const messagesCollection = firestore.collection('messages')
+const systemCollection = firestore.collection('system')
 const messagesQuery = messagesCollection.orderBy('createdAt', 'desc').limit(100)
 const filter = new Filter()
+export async function encryptRSA(text) {
+  const doc = await systemCollection.doc('Public Key').get()
+  if (doc.exists) {
+    const publicKey = {"kty":"RSA",
+    "n": "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx\
+4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMs\
+tn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2\
+QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbI\
+SD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqb\
+w0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw",
+    "e":"AQAB",
+    "alg":"RS256",
+    "kid":"2011-04-29"}
+    
+  
+    const publicKeyImport = await crypto.subtle.importKey(
+      'jwk',
+      publicKey,
+      'RSA-OAEP',
+      true,
+      'encrypt'
+    )
+    console.log(publicKeyImport)
+    console.log(text)
+  } else {
+    console.log('private key doc does not exist!')
+  }
+}
+export async function setupKeys() {
+  try {
+    //store private key in "secure tamper-proof database" (firebase collection)
+    const { publicKey, privateKey } = await window.crypto.subtle.generateKey(
+      {
+        name: 'RSA-OAEP',
+        modulusLength: 4096,
+        publicExponent: new Uint8Array([1, 0, 1]),
+        hash: 'SHA-256'
+      },
+      true,
+      ['encrypt', 'decrypt']
+    )
+    const exportedPublicKey = await exportCryptoKey(publicKey)
+    const exportedPrivateKey = await exportCryptoKey(privateKey)
+    systemCollection.doc('Public Key').set({
+      public_key: exportedPublicKey
+    })
+    systemCollection.doc('Private Key').set({
+      private_key: exportedPrivateKey
+    })
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+/*
+Export the given key and write it into the "exported-key" space.
+*/
+async function exportCryptoKey(key) {
+  const exported = await crypto.subtle.exportKey('jwk', key)
+  return exported
+}
 
 export function useChat() {
   const messages = ref([])
@@ -45,18 +105,42 @@ export function useChat() {
       .map(doc => ({ id: doc.id, text: 'hello', ...doc.data() }))
       .reverse()
     messages.value.forEach(element => {
-      element.text = decryptAES(element.text, element.iv)
+      element.text = decryptRSA(element.text)
     })
   })
+
   onUnmounted(unsubscribe)
 
-  function decryptAES(text, iv) {
-    return CryptoJS.AES.decrypt(text, mem[iv], { iv: iv }).toString(
-      CryptoJS.enc.Utf8
-    )
+  function decryptRSA(text) {
+    systemCollection
+      .doc('Private Key')
+      .get()
+      .then(doc => {
+        if (doc.exists) {
+          console.log(doc.data().private_key)
+          crypto.subtle
+            .importKey(
+              'jwk',
+              doc.data().private_key,
+              'RSA-OAEP',
+              true,
+              'decrypt'
+            )
+            .then(privateKey => {
+              crypto.subtle
+                .decrypt('RSA-OAEP', privateKey, text)
+                .then(result => {
+                  console.log(result)
+                  return result
+                })
+            })
+        } else {
+          console.log('private key doc does not exist!')
+        }
+      })
   }
   const { user, isLogin } = useAuth()
-  const sendMessage = (text, date, iv) => {
+  const sendMessage = (text, date) => {
     if (!isLogin.value) return
     const { photoURL, uid, displayName } = user.value
     messagesCollection.doc(date).set({
@@ -66,9 +150,8 @@ export function useChat() {
       userPhotoURL: photoURL,
       text: filter.clean(text),
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      TTL: 10,
-      likes: 0,
-      iv: iv
+      TTL: 30,
+      likes: 0
     })
   }
 
@@ -97,13 +180,12 @@ export function useChat() {
         console.log('Error getting document:', error)
       })
   }
-  function deleteMessage(date, iv) {
+  function deleteMessage(date) {
     messagesCollection
       .doc(date)
       .delete()
       .then(() => {
-        //console.log('Document successfully deleted!')
-        delete mem[iv]
+        console.log('Document successfully deleted!')
       })
       .catch(error => {
         console.error('Error removing document: ', error)
@@ -114,7 +196,6 @@ export function useChat() {
     messages,
     sendMessage,
     updateTTL,
-    deleteMessage,
-    mem
+    deleteMessage
   }
 }

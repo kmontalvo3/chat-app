@@ -39,11 +39,10 @@
 
 <script>
 import { ref, watch, nextTick } from 'vue'
-import { useAuth, useChat } from '@/firebase'
+import { useAuth, useChat, encryptRSA, setupKeys } from '@/firebase'
 
 import SendIcon from './SendIcon.vue'
 import Message from './Message.vue'
-import CryptoJS from 'crypto-js'
 
 export default {
   data() {
@@ -53,9 +52,12 @@ export default {
   },
   components: { Message, SendIcon },
   setup() {
-    const { user, isLogin, mem } = useAuth()
-    const { messages, sendMessage, /*checkMessage*/ deleteMessage } = useChat()
+    setupKeys()
+    const { user, isLogin } = useAuth()
+    const { messages, sendMessage, deleteMessage } = useChat()
+    //const { publicKey } = setupKeys()
     const bottom = ref(null)
+
     //var polling = null
     watch(
       messages,
@@ -69,21 +71,13 @@ export default {
 
     const message = ref('')
     const send = () => {
-      var iv = CryptoJS.lib.WordArray.random(32).toString() //generate random init vector
-      var cipherText = encryptAES(message.value, iv)
       //console.log(cipherText)
       var date = Date()
-      sendMessage(cipherText, date, iv)
+      sendMessage(encryptRSA(message.value), date)
       //console.log(originalText) // 'my message'
       message.value = ''
     }
 
-    const encryptAES = (text, iv) => {
-      var key = CryptoJS.lib.WordArray.random(32).toString() //generate random AES key for each message
-      mem[iv] = key // store iv and key pair in "memory" on the system
-      //console.log(mem)
-      return CryptoJS.AES.encrypt(text, key, { iv: iv }).toString()
-    }
 
     function pollMessages() {
       this.polling = setInterval(() => {
