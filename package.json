@@ -9,6 +9,9 @@
     "deploy": "yarn build && firebase deploy"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.35",
+    "@fortawesome/free-solid-svg-icons": "^5.15.3",
+    "@fortawesome/vue-fontawesome": "^2.0.2",
     "@mdi/font": "^5.9.55",
     "@tailwindcss/postcss7-compat": "^2.0.4",
     "autoprefixer": "^9.8.6",
@@ -18,7 +21,7 @@
     "firebase": "^8.2.1",
     "firebase-tools": "^9.1.0",
     "postcss": "^7.0.35",
-    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.4",
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.1.0",
     "vue": "^3.0.0",
     "vue-crypt": "^1.0.0",
     "vue-material": "^1.0.0-beta-15"

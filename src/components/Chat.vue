@@ -9,14 +9,16 @@
           userName,
           userId,
           date,
-          likes
+          upvotes,
+          downvotes
         } in messages"
         :key="id"
         :name="userName"
         :photo-url="userPhotoURL"
         :sender="userId === user?.uid"
         :date="date"
-        :likes="likes"
+        :upvotes="upvotes"
+        :downvotes="downvotes"
       >
         {{ text }}
       </Message>

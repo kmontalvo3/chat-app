@@ -7,10 +7,9 @@
         <slot />
       </div>
       <div>
-        <button @click="upVote">{{ likes }}</button>
-      </div>
-      <div>
-        <button @click="downVote">{{ likes }}</button>
+        <Icon type="arrow-up"></Icon>
+        <button style="color:green" @click="upVote">{{ upvotes }}</button>
+        <button style="color:red" @click="downVote">{{ downvotes }}</button>
       </div>
     </div>
     <span id="date">{{ date }}</span>
@@ -22,8 +21,7 @@ import Avatar from './Avatar.vue'
 import 'vue-material/dist/vue-material.min.css'
 import 'vue-material/dist/theme/default.css'
 import { useChat } from '@/firebase'
-const { updateTTL } = useChat()
-
+const { updateTTL, downdateTTL } = useChat()
 export default {
   components: { Avatar },
   props: {
@@ -31,15 +29,16 @@ export default {
     photoUrl: { type: String, default: '' },
     sender: { type: Boolean, default: false },
     date: { type: String, default: '' },
-    likes: { type: Number, default: 0 },
-    show: { type: Boolean, default: true }
+    upvotes: { type: Number, default: 0 },
+    show: { type: Boolean, default: true },
+    downvotes: { type: Number, default: 0 }
   },
   setup(props) {
     const upVote = () => {
       updateTTL(props.date)
     }
     const downVote = () => {
-      updateTTL(props.date)
+      downdateTTL(props.date)
     }
 
     return { upVote, downVote }

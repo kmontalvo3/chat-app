@@ -54,7 +54,7 @@ export function keySnapshot() {
     snapshot.docs.forEach(doc => {
       mem[doc.id] = doc.data().key
     })
-    console.log(mem)
+    //console.log(mem)
   })
 
   onUnmounted(unsubscribe)
@@ -95,16 +95,17 @@ export function useChat() {
       text: filter.clean(text),
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       TTL: 30,
-      likes: 0,
+      upvotes: 0,
       iv: iv,
-      show: false
+      show: false,
+      downvotes: 0
     })
   }
 
   const updateTTL = date => {
     var mesRef = messagesCollection.doc(date)
     var newTTL
-    var newLikes
+    var newupvotes
     if (!isLogin.value) return
     mesRef
       .get()
@@ -112,10 +113,36 @@ export function useChat() {
         if (doc.exists) {
           //console.log('Document data:', doc.data().TTL)
           newTTL = doc.data().TTL + 5
-          newLikes = doc.data().likes + 1
+          newupvotes = doc.data().upvotes + 1
           mesRef.update({
             TTL: newTTL,
-            likes: newLikes
+            upvotes: newupvotes
+          })
+        } else {
+          // doc.data() will be undefined in this case
+          console.log('No such document!')
+        }
+      })
+      .catch(error => {
+        console.log('Error getting document:', error)
+      })
+  }
+
+  const downdateTTL = date => {
+    var mesRef = messagesCollection.doc(date)
+    var newTTL
+    var newdownvotes
+    if (!isLogin.value) return
+    mesRef
+      .get()
+      .then(doc => {
+        if (doc.exists) {
+          //console.log('Document data:', doc.data().TTL)
+          newTTL = doc.data().TTL - 1
+          newdownvotes = doc.data().downvotes + 1
+          mesRef.update({
+            TTL: newTTL,
+            downvotes: newdownvotes
           })
         } else {
           // doc.data() will be undefined in this case
@@ -144,6 +171,7 @@ export function useChat() {
     sendMessage,
     updateTTL,
     deleteMessage,
-    mem
+    mem,
+    downdateTTL
   }
 }
