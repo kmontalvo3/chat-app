@@ -7,7 +7,6 @@
         <slot />
       </div>
       <div>
-        <Icon type="arrow-up"></Icon>
         <button style="color:green" @click="upVote">{{ upvotes }}</button>
         <button style="color:red" @click="downVote">{{ downvotes }}</button>
       </div>
