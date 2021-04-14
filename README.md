@@ -26,3 +26,8 @@ Now you're ready to run the application! The application will be served on your 
 ```
 npm run serve
 ```
+
+## Files
+All major code files are in src
+
+- `firebase.js` contains all the firebase code and coordinates with `components/Chat.vue` to send messages to the firestore realtime database. These two files contain the major code for the application. 

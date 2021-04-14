@@ -17,6 +17,7 @@
     "ant-design-vue": "^1.7.4",
     "autoprefixer": "^9.8.6",
     "bad-words": "^3.0.4",
+    "browserify-fs": "^1.0.0",
     "core-js": "^3.6.5",
     "crypto-js": "^4.0.0",
     "firebase": "^8.2.1",

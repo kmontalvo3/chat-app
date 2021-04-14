@@ -96,7 +96,7 @@ export function useChat() {
       userPhotoURL: photoURL,
       text: filter.clean(text),
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      TTL: 15,
+      TTL: 30,
       upvotes: 0,
       iv: iv,
       show: false,
