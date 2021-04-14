@@ -66,7 +66,7 @@ export function useChat() {
   const messages = ref([])
   const unsubscribe = messagesQuery.onSnapshot(snapshot => {
     messages.value = snapshot.docs
-      .map(doc => ({ id: doc.id, text: 'hello', ...doc.data() }))
+      .map(doc => ({ id: doc.id, ...doc.data() }))
       .reverse()
     messages.value.forEach(element => {
       //console.log(element)
