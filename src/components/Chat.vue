@@ -55,6 +55,8 @@ export default {
   },
   components: { Message, SendIcon },
   setup() {
+    let timeStart = -1
+    let timeEnd = -1
     keySnapshot()
     const { user, isLogin } = useAuth()
     const { messages, sendMessage, /*checkMessage*/ deleteMessage } = useChat()
@@ -64,14 +66,21 @@ export default {
       messages,
       () => {
         nextTick(() => {
-          bottom.value?.scrollIntoView({ behavior: 'smooth' })
+          bottom.value?.scrollIntoView({ behavior: 'smooth' }),
+            (timeEnd = new Date().getTime()),
+            calcTime()
         })
       },
       { deep: true }
     )
 
+    function calcTime() {
+      console.log(timeEnd - timeStart)
+    }
+
     const message = ref('')
     const send = () => {
+      timeStart = new Date().getTime()
       var iv = CryptoJS.lib.WordArray.random(32).toString() //generate random init vector
       var cipherText = encryptAES(message.value, iv)
       //console.log(cipherText)

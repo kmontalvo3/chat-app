@@ -6,6 +6,7 @@ import Filter from 'bad-words'
 import { ref, onUnmounted, computed } from 'vue'
 import CryptoJS from 'crypto-js'
 
+
 firebase.initializeApp({
   apiKey: 'AIzaSyCMa03BrETF3sPdrAuT0dBeU5z0ApRi1R0',
   authDomain: 'chat-19783.firebaseapp.com',
@@ -19,6 +20,7 @@ firebase.initializeApp({
 
 const auth = firebase.auth()
 const mem = new Object()
+
 export function useAuth() {
   const user = ref(null)
   const unsubscribe = auth.onAuthStateChanged(_user => (user.value = _user))
@@ -94,7 +96,7 @@ export function useChat() {
       userPhotoURL: photoURL,
       text: filter.clean(text),
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      TTL: 30,
+      TTL: 1000,
       upvotes: 0,
       iv: iv,
       show: false,
@@ -153,6 +155,7 @@ export function useChat() {
         console.log('Error getting document:', error)
       })
   }
+
   function deleteMessage(date, iv) {
     messagesCollection
       .doc(date)
