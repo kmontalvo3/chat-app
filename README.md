@@ -42,6 +42,7 @@ To run the executables do the following:
 `sh linux+mac_executable.sh` on Mac or Linux
 
 OR
+open up command prompt in Windows and make sure you Run as Administrator, then type the command:
 
 `windows_executable.bat` in Windows
 
