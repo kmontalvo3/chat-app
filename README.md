@@ -31,3 +31,17 @@ npm run serve
 All major code files are in src
 
 - `firebase.js` contains all the firebase code and coordinates with `components/Chat.vue` to send messages to the firestore realtime database. These two files contain the major code for the application. 
+
+## Executables
+There are 2 executables that are availble. One is a bash file for Mac and Linux. The other is a batch file for Windows. 
+
+They pretty much run the commands in the Project Setup part of this README. THEY DO NOT INSTALL NODE FOR YOU. If you do not have node you will still have to install it yourself. 
+
+To run the executables do the following:
+
+`sh linux+mac_executable.sh` on Mac or Linux
+
+OR
+
+`windows_executable.bat` in Windows
+
